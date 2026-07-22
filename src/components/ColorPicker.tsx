@@ -9,7 +9,7 @@ interface ColorPickerProps {
 }
 
 export default function ColorPicker({ onExportPage, isExportingPage }: ColorPickerProps) {
-  const { baseHex, setBaseHex, randomize } = useColor();
+  const { baseHex, setBaseHex, randomize, isDarkMode } = useColor();
   const [inputVal, setInputVal] = useState(baseHex);
 
   useEffect(() => { setInputVal(baseHex); }, [baseHex]);
@@ -21,7 +21,9 @@ export default function ColorPicker({ onExportPage, isExportingPage }: ColorPick
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-3 bg-white border border-slate-200/80 rounded-2xl px-4 py-2.5 shadow-sm">
+    <div className={`flex flex-wrap items-center gap-3 border rounded-2xl px-4 py-2.5 shadow-sm transition-colors ${
+      isDarkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200/80 text-slate-900'
+    }`}>
       <input
         type="color"
         value={baseHex}
@@ -34,7 +36,9 @@ export default function ColorPicker({ onExportPage, isExportingPage }: ColorPick
         value={inputVal}
         onChange={e => handleTextChange(e.target.value)}
         onBlur={() => setInputVal(baseHex)}
-        className="font-mono text-base font-semibold text-slate-800 w-24 border-none outline-none bg-transparent uppercase"
+        className={`font-mono text-base font-bold w-24 border-none outline-none bg-transparent uppercase ${
+          isDarkMode ? 'text-white' : 'text-slate-800'
+        }`}
         maxLength={7}
       />
       <button

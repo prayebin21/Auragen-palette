@@ -67,15 +67,40 @@ export function generateScale(baseHex: string): ColorScale {
 }
 
 export function getContrastColor(hex: string): string {
-  const r = parseInt(hex.slice(1,3),16);
-  const g = parseInt(hex.slice(3,5),16);
-  const b = parseInt(hex.slice(5,7),16);
-  const luminance = (0.299*r + 0.587*g + 0.114*b) / 255;
-  return luminance > 0.55 ? '#0f172a' : '#ffffff';
+  const ratioWhite = getContrastRatio(hex, '#FFFFFF');
+  const ratioBlack = getContrastRatio(hex, '#0F172A');
+  return ratioWhite >= ratioBlack ? '#FFFFFF' : '#0F172A';
 }
 
 export function randomHex(): string {
   return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6,'0').toUpperCase();
+}
+
+/**
+ * WCAG 2.1 Relative Luminance Calculation
+ */
+export function getRelativeLuminance(hex: string): number {
+  const clean = hex.replace(/^#/, '');
+  if (clean.length !== 6) return 0;
+  const r = parseInt(clean.slice(0, 2), 16) / 255;
+  const g = parseInt(clean.slice(2, 4), 16) / 255;
+  const b = parseInt(clean.slice(4, 6), 16) / 255;
+
+  const cal = (c: number) => c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+
+  return 0.2126 * cal(r) + 0.7152 * cal(g) + 0.0722 * cal(b);
+}
+
+/**
+ * WCAG 2.1 Contrast Ratio Calculation (1.0 : 1 to 21.0 : 1)
+ */
+export function getContrastRatio(hex1: string, hex2: string): number {
+  const lum1 = getRelativeLuminance(hex1);
+  const lum2 = getRelativeLuminance(hex2);
+  const max = Math.max(lum1, lum2);
+  const min = Math.min(lum1, lum2);
+  const ratio = (max + 0.05) / (min + 0.05);
+  return Math.round(ratio * 100) / 100;
 }
 
 /**
@@ -87,28 +112,24 @@ export function generateModeHex(mode: ColorMode, index: number, baseH?: number):
 
   switch (mode) {
     case 'warm':
-      // Warm Hues: 0 - 50 (Red, Orange, Amber, Gold) or 345 - 360 (Warm Crimson)
       h = Math.random() > 0.2 ? Math.floor(Math.random() * 50) : 345 + Math.floor(Math.random() * 15);
-      s = 75 + Math.floor(Math.random() * 20); // 75-95%
-      l = 45 + Math.floor(Math.random() * 25); // 45-70%
+      s = 75 + Math.floor(Math.random() * 20);
+      l = 45 + Math.floor(Math.random() * 25);
       break;
 
     case 'cool':
-      // Cool Hues: 160 - 260 (Teal, Cyan, Sapphire, Ice Blue)
       h = 160 + Math.floor(Math.random() * 100);
-      s = 70 + Math.floor(Math.random() * 25); // 70-95%
-      l = 40 + Math.floor(Math.random() * 30); // 40-70%
+      s = 70 + Math.floor(Math.random() * 25);
+      l = 40 + Math.floor(Math.random() * 30);
       break;
 
     case 'pastel':
-      // Soft Dreamy Pastel: Lightness (80-92%), Soft Saturation (45-70%)
       h = Math.floor(Math.random() * 360);
       s = 45 + Math.floor(Math.random() * 25);
       l = 80 + Math.floor(Math.random() * 12);
       break;
 
     case 'vivid':
-      // Electric Vivid: High Saturation (85-100%), Punchy Lightness (50-65%)
       h = Math.floor(Math.random() * 360);
       s = 85 + Math.floor(Math.random() * 15);
       l = 50 + Math.floor(Math.random() * 15);
@@ -116,7 +137,6 @@ export function generateModeHex(mode: ColorMode, index: number, baseH?: number):
 
     case 'harmony':
     default:
-      // True Color Theory Harmonies (Analogous / Triadic / Split-Complementary)
       const offsets = [0, 30, 60, 180, 210];
       h = (base + offsets[index % 5] + Math.floor(Math.random() * 10 - 5) + 360) % 360;
       s = 65 + Math.floor(Math.random() * 25);

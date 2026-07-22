@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Lock, Unlock, Copy, Check, RefreshCw, SlidersHorizontal, Sparkles, Image as ImageIcon, Loader2, Sun, Moon, ArrowUpRight, Flame, Search, X } from 'lucide-react';
-import { hexToRgb, getContrastColor, generateModeHex, hexToHsl, ColorMode } from '@/lib/colorUtils';
+import { Lock, Unlock, Copy, Check, RefreshCw, SlidersHorizontal, Sparkles, Image as ImageIcon, Loader2, Sun, Moon, ArrowUpRight, Flame, Search, X, ShieldCheck } from 'lucide-react';
+import { hexToRgb, getContrastColor, generateModeHex, hexToHsl, getContrastRatio, ColorMode } from '@/lib/colorUtils';
 import { downloadElementAsPng, getExportFileName } from '@/lib/exportUtils';
 import { useColor } from '@/context/ColorContext';
 
@@ -77,7 +77,7 @@ const TRENDING_PALETTES: TrendingPalette[] = [
   { name: 'Pastel Sherbet', category: 'Pastel', colors: ['#FF9AA2', '#FFB7B2', '#FFDAC1', '#E2F0CB', '#B5EAD7'] },
   { name: 'Sweet Macaron', category: 'Pastel', colors: ['#F3C4FB', '#ECBCFD', '#E5B3FE', '#E2AFDE', '#BBC1F8'] },
   { name: 'Cherry Blossom', category: 'Pastel', colors: ['#2B1055', '#59287B', '#8C52FF', '#FF66C4', '#FFDEE9'] },
-  { name: 'Soft Sorbet', category: 'Pastel', colors: ['#FFF5E4', '#FFE3E1', '#FFD1D1', '#FF9494', '#FFF5E4'] },
+  { name: 'Soft Sorbet', category: 'Pastel', colors: ['#FFF5F4', '#FFE3E1', '#FFD1D1', '#FF9494', '#FFF5E4'] },
   { name: 'Sweet Matcha', category: 'Pastel', colors: ['#E4F0E8', '#A8D5BA', '#6EA076', '#3E6B48', '#1C3829'] },
   { name: 'Bubblegum Pastel', category: 'Pastel', colors: ['#FFC2D1', '#FFE5EC', '#FB6F92', '#FFB3C6', '#FF8FAB'] },
   { name: 'Pastel Cloud', category: 'Pastel', colors: ['#D0F4DE', '#A9DEF9', '#E4C1F9', '#FCF6BD', '#FF99C8'] },
@@ -425,6 +425,7 @@ export default function PaletteGeneratorTab() {
             const contrast = getContrastColor(color.hex);
             const isCopied = copiedHex === color.hex;
             const rgbString = hexToRgb(color.hex);
+            const ratioVal = getContrastRatio(color.hex, contrast);
 
             return (
               <div
@@ -432,29 +433,36 @@ export default function PaletteGeneratorTab() {
                 className="flex-1 rounded-2xl md:rounded-3xl p-3 md:p-6 flex flex-row md:flex-col items-center md:items-stretch justify-between relative group transition-all duration-300 shadow-sm border border-black/5 overflow-hidden"
                 style={{ backgroundColor: color.hex, color: contrast }}
               >
-                {/* Lock & Color Picker Controls */}
-                <div className="flex items-center gap-2 md:justify-between z-10 export-hide">
-                  <button
-                    onClick={() => toggleLock(index)}
-                    className="w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl flex items-center justify-center backdrop-blur-md transition-all hover:scale-105"
-                    style={{
-                      backgroundColor: color.locked ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.25)',
-                      color: color.locked ? '#fff' : contrast,
-                    }}
-                    title={color.locked ? 'Click to Unlock' : 'Click to Lock'}
-                  >
-                    {color.locked ? <Lock size={15} /> : <Unlock size={15} />}
-                  </button>
+                {/* Lock & Color Picker Controls + WCAG Badge */}
+                <div className="flex items-center gap-2 md:justify-between z-10 export-hide w-auto md:w-full">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => toggleLock(index)}
+                      className="w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl flex items-center justify-center backdrop-blur-md transition-all hover:scale-105"
+                      style={{
+                        backgroundColor: color.locked ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.25)',
+                        color: color.locked ? '#fff' : contrast,
+                      }}
+                      title={color.locked ? 'Click to Unlock' : 'Click to Lock'}
+                    >
+                      {color.locked ? <Lock size={15} /> : <Unlock size={15} />}
+                    </button>
 
-                  <label className="w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl flex items-center justify-center backdrop-blur-md cursor-pointer transition-transform hover:scale-105" style={{ backgroundColor: 'rgba(255,255,255,0.25)' }}>
-                    <input
-                      type="color"
-                      value={color.hex}
-                      onChange={e => updateColor(index, e.target.value)}
-                      className="opacity-0 w-0 h-0 absolute"
-                    />
-                    <Sparkles size={14} />
-                  </label>
+                    <label className="w-8 h-8 md:w-10 md:h-10 rounded-xl md:rounded-2xl flex items-center justify-center backdrop-blur-md cursor-pointer transition-transform hover:scale-105" style={{ backgroundColor: 'rgba(255,255,255,0.25)' }}>
+                      <input
+                        type="color"
+                        value={color.hex}
+                        onChange={e => updateColor(index, e.target.value)}
+                        className="opacity-0 w-0 h-0 absolute"
+                      />
+                      <Sparkles size={14} />
+                    </label>
+                  </div>
+
+                  {/* Live WCAG Badge */}
+                  <span className="font-mono text-[9px] md:text-xs font-bold px-2 py-0.5 rounded-lg backdrop-blur-md opacity-90 flex items-center gap-1" style={{ backgroundColor: 'rgba(255,255,255,0.25)', color: contrast }}>
+                    <ShieldCheck size={11} /> {ratioVal}:1
+                  </span>
                 </div>
 
                 {/* Center Codes on Mobile / Bottom Codes on Desktop */}
@@ -610,7 +618,7 @@ export default function PaletteGeneratorTab() {
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2.5">
-                      <span className="text-xs font-extrabold truncate pr-2">{p.name}</span>
+                      <span className={`text-xs font-extrabold truncate pr-2 ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{p.name}</span>
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
                         isDarkMode ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600'
                       }`}>

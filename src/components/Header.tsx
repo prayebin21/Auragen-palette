@@ -1,10 +1,12 @@
 'use client';
-import { Palette, Layers, Home } from 'lucide-react';
+import { Palette, Layers, Home, ShieldCheck } from 'lucide-react';
 import { useColor } from '@/context/ColorContext';
 
+export type TabType = 'home' | 'palette' | 'tailwind' | 'contrast';
+
 interface HeaderProps {
-  activeTab: 'home' | 'palette' | 'tailwind';
-  setActiveTab: (tab: 'home' | 'palette' | 'tailwind') => void;
+  activeTab: TabType;
+  setActiveTab: (tab: TabType) => void;
 }
 
 export default function Header({ activeTab, setActiveTab }: HeaderProps) {
@@ -44,7 +46,7 @@ export default function Header({ activeTab, setActiveTab }: HeaderProps) {
         </div>
 
         {/* Navigation Tabs - Full Width Grid on Mobile, Flex on Desktop */}
-        <nav className={`w-full sm:w-auto grid grid-cols-3 sm:flex items-center gap-1 p-1 rounded-2xl border ${
+        <nav className={`w-full sm:w-auto grid grid-cols-4 sm:flex items-center gap-1 p-1 rounded-2xl border ${
           isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white/80 border-amber-900/10 shadow-xs'
         }`}>
           <button
@@ -82,7 +84,20 @@ export default function Header({ activeTab, setActiveTab }: HeaderProps) {
           >
             <Layers size={14} className="flex-shrink-0" />
             <span className="hidden sm:inline">Tailwind Studio</span>
-            <span className="sm:hidden">Tailwind</span>
+            <span className="sm:hidden">Studio</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('contrast')}
+            className={`flex items-center justify-center gap-1.5 text-xs font-extrabold px-2.5 sm:px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
+              activeTab === 'contrast'
+                ? isDarkMode ? 'bg-slate-700 text-white shadow-sm' : 'bg-amber-100/80 text-amber-950 shadow-xs'
+                : isDarkMode ? 'text-slate-400 hover:text-slate-100' : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <ShieldCheck size={14} className="flex-shrink-0" />
+            <span className="hidden sm:inline">Contrast Checker</span>
+            <span className="sm:hidden">Contrast</span>
           </button>
         </nav>
 

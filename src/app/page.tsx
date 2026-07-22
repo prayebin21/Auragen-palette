@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import Header from '@/components/Header';
+import Header, { TabType } from '@/components/Header';
 import LandingHero from '@/components/LandingHero';
 import ColorPicker from '@/components/ColorPicker';
 import PaletteBar from '@/components/PaletteBar';
 import PaletteGeneratorTab from '@/components/PaletteGeneratorTab';
+import ContrastCheckerTab from '@/components/ContrastCheckerTab';
 import HeroCard from '@/components/previews/HeroCard';
 import CategoriesCard from '@/components/previews/CategoriesCard';
 import FinanceCard from '@/components/previews/FinanceCard';
@@ -25,10 +26,11 @@ import HandbookCard from '@/components/previews/HandbookCard';
 import DonutStatsCard from '@/components/previews/DonutStatsCard';
 import { downloadElementAsPng, getExportFileName } from '@/lib/exportUtils';
 import { useColor } from '@/context/ColorContext';
+import { Paintbrush } from 'lucide-react';
 
 export default function Home() {
   const { isDarkMode } = useColor();
-  const [activeTab, setActiveTab] = useState<'home' | 'palette' | 'tailwind'>('home');
+  const [activeTab, setActiveTab] = useState<TabType>('home');
   const [isExportingPage, setIsExportingPage] = useState(false);
   const studioPageRef = useRef<HTMLDivElement>(null);
 
@@ -90,11 +92,28 @@ export default function Home() {
           {/* Tab 2: Tailwind Studio (50-950 scale & component visualizer) */}
           {activeTab === 'tailwind' && (
             <div className="flex flex-col">
-              {/* Title Row - Responsive Flex Column on Mobile */}
-              <div className="min-h-14 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+              {/* Title Row - Identical Layout Structure as Palette Generator */}
+              <div className="min-h-14 flex items-center justify-between gap-4 mb-5">
                 <h1 className={`text-2xl sm:text-3xl font-black tracking-tight leading-none ${titleClass}`}>
                   Tailwind <span className="text-orange-600">Studio</span>
                 </h1>
+              </div>
+
+              {/* Full-width Rounded Control Bar - ColorPicker Controls */}
+              <div className={`p-3.5 sm:p-4 rounded-3xl border shadow-sm flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-4 transition-colors mb-6 ${
+                isDarkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200/80 text-slate-900'
+              }`}>
+                <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                  <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5 flex-shrink-0">
+                    <Paintbrush size={14} className="text-teal-500" /> Scale Mode:
+                  </span>
+                  <span className={`px-3.5 py-1.5 rounded-xl text-xs font-black border transition-all ${
+                    isDarkMode ? 'bg-slate-800 border-slate-700 text-teal-400' : 'bg-teal-50 border-teal-200 text-teal-700'
+                  }`}>
+                    ✦ 50 – 950 Scale Generator
+                  </span>
+                </div>
+
                 <ColorPicker onExportPage={handleExportFullPage} isExportingPage={isExportingPage} />
               </div>
 
@@ -194,6 +213,19 @@ export default function Home() {
 
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Tab 3: WCAG 2.1 Contrast Checker Suite */}
+          {activeTab === 'contrast' && (
+            <div className="flex flex-col">
+              {/* Title Row - Identical Layout Structure as Palette Generator & Tailwind Studio */}
+              <div className="min-h-14 flex items-center justify-between gap-4 mb-5">
+                <h1 className={`text-2xl sm:text-3xl font-black tracking-tight leading-none ${titleClass}`}>
+                  Contrast <span className="text-orange-600">Checker</span>
+                </h1>
+              </div>
+              <ContrastCheckerTab />
             </div>
           )}
 

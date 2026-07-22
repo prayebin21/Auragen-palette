@@ -1,8 +1,9 @@
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Lock, Unlock, Copy, Check, RefreshCw, SlidersHorizontal, Sparkles, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Lock, Unlock, Copy, Check, RefreshCw, SlidersHorizontal, Sparkles, Image as ImageIcon, Loader2, Sun, Moon } from 'lucide-react';
 import { hexToRgb } from '@/lib/colorUtils';
 import { downloadElementAsPng, getExportFileName } from '@/lib/exportUtils';
+import { useColor } from '@/context/ColorContext';
 
 interface PaletteColor {
   hex: string;
@@ -55,6 +56,7 @@ function getContrastColor(hex: string): string {
 }
 
 export default function PaletteGeneratorTab() {
+  const { isDarkMode, setDarkMode } = useColor();
   const [mode, setMode] = useState<ColorMode>('harmony');
   const [colors, setColors] = useState<PaletteColor[]>(() => [
     { hex: '#3B82F6', locked: false },
@@ -135,10 +137,14 @@ export default function PaletteGeneratorTab() {
   return (
     <div className="flex flex-col gap-5">
       {/* Control Bar */}
-      <div className="bg-white border border-slate-200/80 p-4 rounded-3xl shadow-sm flex flex-wrap items-center justify-between gap-4">
+      <div className={`border p-4 rounded-3xl shadow-sm flex flex-wrap items-center justify-between gap-4 transition-colors ${
+        isDarkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200/80 text-slate-900'
+      }`}>
         {/* Mode Selector Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto py-1">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2 flex items-center gap-1">
+          <span className={`text-xs font-bold uppercase tracking-wider mr-2 flex items-center gap-1 ${
+            isDarkMode ? 'text-slate-400' : 'text-slate-400'
+          }`}>
             <SlidersHorizontal size={13} /> Mode:
           </span>
           {modes.map(m => (
@@ -147,8 +153,8 @@ export default function PaletteGeneratorTab() {
               onClick={() => setMode(m.id)}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 mode === m.id
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  ? isDarkMode ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-900 text-white shadow-sm'
+                  : isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
               {m.label}
@@ -158,8 +164,38 @@ export default function PaletteGeneratorTab() {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-3">
-          <span className="hidden sm:inline-block text-xs font-semibold text-slate-400">
-            Press <kbd className="px-2 py-1 bg-slate-100 border border-slate-200 rounded-md font-mono text-[11px]">Spacebar</kbd> to generate
+          {/* Light / Dark Mode Toggle */}
+          <div className={`flex gap-1 text-xs font-semibold p-1 rounded-xl border ${
+            isDarkMode ? 'bg-slate-800/80 border-slate-700' : 'bg-slate-100 border-slate-200'
+          }`}>
+            <button
+              onClick={() => setDarkMode(false)}
+              className={`flex items-center gap-1 px-3 py-1 rounded-lg transition-all ${
+                !isDarkMode
+                  ? 'bg-white text-slate-900 shadow-sm font-bold'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Sun size={12} />
+              <span>Light</span>
+            </button>
+            <button
+              onClick={() => setDarkMode(true)}
+              className={`flex items-center gap-1 px-3 py-1 rounded-lg transition-all ${
+                isDarkMode
+                  ? 'bg-slate-700 text-white shadow-sm font-bold'
+                  : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              <Moon size={12} />
+              <span>Dark</span>
+            </button>
+          </div>
+
+          <span className="hidden lg:inline-block text-xs font-semibold text-slate-400">
+            Press <kbd className={`px-2 py-1 border rounded-md font-mono text-[11px] ${
+              isDarkMode ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-600'
+            }`}>Spacebar</kbd> to generate
           </span>
           <button
             onClick={generatePalette}
@@ -170,9 +206,11 @@ export default function PaletteGeneratorTab() {
           </button>
           <button
             onClick={copyAll}
-            className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm px-4 py-2 rounded-xl transition-colors"
+            className={`flex items-center gap-1.5 font-bold text-sm px-4 py-2 rounded-xl transition-colors ${
+              isDarkMode ? 'bg-slate-800 hover:bg-slate-700 text-slate-200' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+            }`}
           >
-            {copiedAll ? <Check size={15} className="text-green-600" /> : <Copy size={15} />}
+            {copiedAll ? <Check size={15} className="text-green-500" /> : <Copy size={15} />}
             {copiedAll ? 'Copied All!' : 'Copy HEX & RGB'}
           </button>
           <button
@@ -187,7 +225,9 @@ export default function PaletteGeneratorTab() {
       </div>
 
       {/* 5 Big Color Columns Grid (Exported container) */}
-      <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 min-h-[460px] p-4 bg-white rounded-3xl relative">
+      <div ref={gridRef} className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 min-h-[460px] p-4 rounded-3xl relative transition-colors ${
+        isDarkMode ? 'bg-slate-900 border border-slate-800' : 'bg-white'
+      }`}>
         {colors.map((color, index) => {
           const contrast = getContrastColor(color.hex);
           const isCopied = copiedHex === color.hex;

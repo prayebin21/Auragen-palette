@@ -26,10 +26,10 @@ export default function PaletteBar() {
   };
 
   return (
-    <div ref={barRef} className={`rounded-2xl border shadow-sm overflow-hidden mb-4 p-4 transition-colors ${
-      isDarkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+    <div ref={barRef} className={`rounded-3xl border shadow-sm overflow-hidden p-4 transition-colors ${
+      isDarkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white/80 border-amber-900/10 text-slate-900'
     }`}>
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <span className="text-sm font-bold">
           Palette 1 (<span className="font-mono">{baseHex}</span>)
         </span>
@@ -40,7 +40,7 @@ export default function PaletteBar() {
           }`}>
             <button
               onClick={() => setDarkMode(false)}
-              className={`flex items-center gap-1 px-3 py-1 rounded-lg transition-all ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all ${
                 !isDarkMode
                   ? 'bg-white text-slate-900 shadow-sm font-bold'
                   : 'text-slate-400 hover:text-slate-200'
@@ -51,7 +51,7 @@ export default function PaletteBar() {
             </button>
             <button
               onClick={() => setDarkMode(true)}
-              className={`flex items-center gap-1 px-3 py-1 rounded-lg transition-all ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-all ${
                 isDarkMode
                   ? 'bg-slate-700 text-white shadow-sm font-bold'
                   : 'text-slate-500 hover:text-slate-900'
@@ -72,13 +72,14 @@ export default function PaletteBar() {
             }`}
           >
             {isExporting ? <Loader2 size={13} className="animate-spin" /> : <ImageIcon size={13} />}
-            <span>{isExporting ? 'Exporting...' : 'Export PNG'}</span>
+            <span className="hidden xs:inline">{isExporting ? 'Exporting...' : 'Export PNG'}</span>
+            <span className="xs:hidden">Export</span>
           </button>
         </div>
       </div>
 
-      {/* 50 - 950 Scale Strip with High-Contrast Badges */}
-      <div className="flex h-20 rounded-xl overflow-hidden shadow-inner border border-black/5">
+      {/* 50 - 950 Scale Strip with Horizontal Touch Scroll on Mobile */}
+      <div className="flex h-20 rounded-2xl overflow-x-auto shadow-inner border border-black/5 no-scrollbar min-w-full">
         {SCALE_KEYS.map(key => {
           const hex = scale[key];
           const contrast = getContrastColor(hex);
@@ -89,7 +90,7 @@ export default function PaletteBar() {
             <button
               key={key}
               onClick={() => copy(key, hex)}
-              className="flex-1 flex flex-col transition-all hover:flex-[1.4] overflow-hidden group relative"
+              className="flex-1 min-w-[40px] sm:min-w-0 flex flex-col transition-all hover:flex-[1.4] overflow-hidden group relative"
               style={{ backgroundColor: hex }}
               title={`${key}: ${hex}`}
             >
@@ -97,7 +98,7 @@ export default function PaletteBar() {
               <div className="flex-1 flex items-end justify-center pb-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                 {isCopied ? (
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm bg-slate-900 text-green-400 flex items-center gap-1">
-                    <Check size={10} /> Copied
+                    <Check size={10} />
                   </span>
                 ) : (
                   <span
@@ -115,7 +116,7 @@ export default function PaletteBar() {
               {/* Number Badge (50, 100... 950) with High Contrast Badge & Backdrop Blur */}
               <div className="pb-1.5 pt-0.5 flex justify-center items-center z-10">
                 <span
-                  className="text-[10px] font-black px-2 py-0.5 rounded-md shadow-sm border transition-transform group-hover:scale-105"
+                  className="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-sm border transition-transform group-hover:scale-105"
                   style={{
                     backgroundColor: isDarkBg ? 'rgba(0, 0, 0, 0.4)' : 'rgba(255, 255, 255, 0.75)',
                     color: isDarkBg ? '#ffffff' : '#0f172a',

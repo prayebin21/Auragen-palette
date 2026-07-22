@@ -1,7 +1,12 @@
 @import 'tailwindcss';
 
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
 body {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: inherit;
 }
 
 input[type='color'] {

@@ -51,10 +51,13 @@ export default function Home() {
     <div className={`min-h-screen transition-colors duration-300 relative ${
       isDarkMode ? 'bg-[#0b0f19] text-white' : 'bg-[#FAF6EE] text-slate-900'
     }`}>
-      {/* FULL PAGE BACKGROUND IMAGE (bg.png & bgdark.png) */}
+      {/* PERFORMANCE OPTIMIZED BACKGROUND IMAGE OVERLAY (bg.png & bgdark.png) */}
       <img
         src={isDarkMode ? '/bgdark.png' : '/bg.png'}
         alt="Background"
+        loading="eager"
+        decoding="async"
+        fetchPriority="high"
         className="fixed inset-0 w-full h-full object-cover object-top pointer-events-none transition-opacity duration-500 opacity-70 z-0"
       />
 

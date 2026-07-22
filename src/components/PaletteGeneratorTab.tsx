@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Lock, Unlock, Copy, Check, RefreshCw, SlidersHorizontal, Sparkles, Image as ImageIcon, Loader2, Sun, Moon, ArrowUpRight, Flame, Search, X } from 'lucide-react';
-import { hexToRgb, getContrastColor } from '@/lib/colorUtils';
+import { hexToRgb, getContrastColor, generateModeHex, hexToHsl, ColorMode } from '@/lib/colorUtils';
 import { downloadElementAsPng, getExportFileName } from '@/lib/exportUtils';
 import { useColor } from '@/context/ColorContext';
 
@@ -10,8 +10,6 @@ interface PaletteColor {
   locked: boolean;
 }
 
-type ColorMode = 'harmony' | 'warm' | 'vivid' | 'pastel' | 'cool';
-
 interface TrendingPalette {
   name: string;
   category: 'Warm' | 'Cool' | 'Pastel' | 'Vivid' | 'Dark' | 'Earth' | 'Retro' | 'Neon';
@@ -19,7 +17,7 @@ interface TrendingPalette {
 }
 
 const TRENDING_PALETTES: TrendingPalette[] = [
-  // --- WARM (25 Palettes) ---
+  // --- WARM (22 Palettes) ---
   { name: 'Espresso Roast', category: 'Warm', colors: ['#2B1B17', '#4A2C2A', '#8C4A32', '#C68B59', '#E7D4C0'] },
   { name: 'Sunset Glow', category: 'Warm', colors: ['#2B2D42', '#8D99AE', '#EDF2F4', '#EF233C', '#D90429'] },
   { name: 'Forest Autumn', category: 'Warm', colors: ['#1C3144', '#D00000', '#FFBA08', '#3F88C5', '#032B43'] },
@@ -30,9 +28,8 @@ const TRENDING_PALETTES: TrendingPalette[] = [
   { name: 'Spiced Pumpkin', category: 'Warm', colors: ['#461220', '#8C2F39', '#B23A48', '#FED0BB', '#E09F67'] },
   { name: 'Copper Rust', category: 'Warm', colors: ['#264653', '#2A9D8F', '#E9C46A', '#F4A261', '#E76F51'] },
   { name: 'Burnt Sienna', category: 'Warm', colors: ['#3A1211', '#5C1D18', '#8A2B20', '#C95A49', '#F4A89A'] },
-  { name: 'ColorHunt - Sunburst Orange', category: 'Warm', colors: ['#330000', '#780000', '#D83A00', '#FF7700', '#FFB703'] },
-  { name: 'ColorHunt - Golden Hour', category: 'Warm', colors: ['#2D1E2F', '#593A5C', '#9A6088', '#E68A8A', '#FCD5CE'] },
-  { name: 'ColorHunt - Coral Dusk', category: 'Warm', colors: ['#3D1308', '#73200D', '#C4491D', '#F27A45', '#FFCBB3'] },
+  { name: 'Golden Hour', category: 'Warm', colors: ['#2D1E2F', '#593A5C', '#9A6088', '#E68A8A', '#FCD5CE'] },
+  { name: 'Coral Dusk', category: 'Warm', colors: ['#3D1308', '#73200D', '#C4491D', '#F27A45', '#FFCBB3'] },
   { name: 'Autumn Spice', category: 'Warm', colors: ['#541212', '#8B0000', '#C40000', '#FF7A00', '#FFD000'] },
   { name: 'Desert Sunset', category: 'Warm', colors: ['#26115B', '#4D1B7B', '#8C1F78', '#D6346A', '#FF7657'] },
   { name: 'Peach Apricot', category: 'Warm', colors: ['#5C2018', '#993D2C', '#D9654C', '#F2A07E', '#FCE3D7'] },
@@ -43,10 +40,8 @@ const TRENDING_PALETTES: TrendingPalette[] = [
   { name: 'Marigold Spark', category: 'Warm', colors: ['#421A00', '#7A3300', '#B85200', '#F28500', '#FFC04D'] },
   { name: 'Rustic Brick', category: 'Warm', colors: ['#361614', '#592522', '#873B36', '#BD5D56', '#EBB0AA'] },
   { name: 'Golden Harvest', category: 'Warm', colors: ['#3D2C04', '#6E510B', '#A87E17', '#E6B227', '#FCE79E'] },
-  { name: 'Warm Terracotta Glow', category: 'Warm', colors: ['#421815', '#6B2C27', '#A14A43', '#D6766F', '#F5C6C2'] },
-  { name: 'Flame Ember', category: 'Warm', colors: ['#240505', '#570B0B', '#991A1A', '#DC3535', '#FF8E8E'] },
 
-  // --- COOL (25 Palettes) ---
+  // --- COOL (22 Palettes) ---
   { name: 'Oceanic Breeze', category: 'Cool', colors: ['#0B2545', '#134074', '#8DA9C4', '#EEF4F8', '#EE6C4D'] },
   { name: 'Emerald Luxe', category: 'Cool', colors: ['#064E3B', '#047857', '#10B981', '#6EE7B7', '#D1FAE5'] },
   { name: 'Nordic Clean', category: 'Cool', colors: ['#2B2D42', '#8D99AE', '#EDF2F4', '#2A9D8F', '#E76F51'] },
@@ -57,9 +52,9 @@ const TRENDING_PALETTES: TrendingPalette[] = [
   { name: 'Polar Aurora', category: 'Cool', colors: ['#051923', '#003554', '#006494', '#0582CA', '#00A6FB'] },
   { name: 'Pacific Blue', category: 'Cool', colors: ['#03045E', '#0077B6', '#00B4D8', '#90E0EF', '#CAF0F8'] },
   { name: 'Alpine Frost', category: 'Cool', colors: ['#2B3A42', '#3F5A69', '#5B7B88', '#9DB2BF', '#DDE6ED'] },
-  { name: 'ColorHunt - Ocean Abyss', category: 'Cool', colors: ['#001219', '#005F73', '#0A9396', '#94D2BD', '#E9D8A6'] },
-  { name: 'ColorHunt - Cyber Emerald', category: 'Cool', colors: ['#002B49', '#005C53', '#9FC131', '#DBF227', '#D6D58E'] },
-  { name: 'ColorHunt - Cool Iceberg', category: 'Cool', colors: ['#03045E', '#0077B6', '#00B4D8', '#90E0EF', '#E0F7FA'] },
+  { name: 'Ocean Abyss', category: 'Cool', colors: ['#001219', '#005F73', '#0A9396', '#94D2BD', '#E9D8A6'] },
+  { name: 'Cyber Emerald', category: 'Cool', colors: ['#002B49', '#005C53', '#9FC131', '#DBF227', '#D6D58E'] },
+  { name: 'Cool Iceberg', category: 'Cool', colors: ['#03045E', '#0077B6', '#00B4D8', '#90E0EF', '#E0F7FA'] },
   { name: 'Mint Seaweed', category: 'Cool', colors: ['#0A2E23', '#155D46', '#259672', '#41CBB1', '#85E3D2'] },
   { name: 'Cobalt Depth', category: 'Cool', colors: ['#0A1128', '#1C2541', '#3A506B', '#5BC0BE', '#6FFFE9'] },
   { name: 'Steel Sky', category: 'Cool', colors: ['#1A2536', '#2C3E55', '#46607F', '#6C8EA4', '#A4C3D2'] },
@@ -69,11 +64,8 @@ const TRENDING_PALETTES: TrendingPalette[] = [
   { name: 'Aqua Splash', category: 'Cool', colors: ['#042A2B', '#105B5C', '#209395', '#3AC6C9', '#86EFF1'] },
   { name: 'Deep Ocean Trench', category: 'Cool', colors: ['#010C1E', '#042247', '#0A427D', '#1669BD', '#4FA8FF'] },
   { name: 'Sky High Blue', category: 'Cool', colors: ['#0C2340', '#1D4570', '#3270A6', '#59A5D8', '#9BCEF0'] },
-  { name: 'Frozen Tundra', category: 'Cool', colors: ['#1B2A38', '#324A5E', '#50718A', '#7A9EBA', '#B5D5EC'] },
-  { name: 'Winter Pine', category: 'Cool', colors: ['#0A1D1A', '#163B35', '#286157', '#409284', '#7EC7BC'] },
-  { name: 'Arctic Wave', category: 'Cool', colors: ['#02131D', '#083248', '#135C80', '#258EB8', '#6BC3E8'] },
 
-  // --- PASTEL (25 Palettes) ---
+  // --- PASTEL (22 Palettes) ---
   { name: 'Minimal Pastel', category: 'Pastel', colors: ['#FBF8CC', '#FDE4CF', '#FFCFD2', '#F1C0E8', '#CFBAF0'] },
   { name: 'Cotton Candy', category: 'Pastel', colors: ['#FFC8DD', '#FFAFCC', '#BDE0FE', '#A2D2FF', '#CDB4DB'] },
   { name: 'Latte Cream', category: 'Pastel', colors: ['#EDE0D4', '#E63946', '#F1FAEE', '#A8DADC', '#457B9D'] },
@@ -84,9 +76,9 @@ const TRENDING_PALETTES: TrendingPalette[] = [
   { name: 'Baby Blue & Butter', category: 'Pastel', colors: ['#FFF1E6', '#FDE2E4', '#FAD2E1', '#E2ECE9', '#BEE1E6'] },
   { name: 'Pastel Sherbet', category: 'Pastel', colors: ['#FF9AA2', '#FFB7B2', '#FFDAC1', '#E2F0CB', '#B5EAD7'] },
   { name: 'Sweet Macaron', category: 'Pastel', colors: ['#F3C4FB', '#ECBCFD', '#E5B3FE', '#E2AFDE', '#BBC1F8'] },
-  { name: 'ColorHunt - Cherry Blossom', category: 'Pastel', colors: ['#2B1055', '#59287B', '#8C52FF', '#FF66C4', '#FFDEE9'] },
-  { name: 'ColorHunt - Soft Sorbet', category: 'Pastel', colors: ['#FFF5E4', '#FFE3E1', '#FFD1D1', '#FF9494', '#FFF5E4'] },
-  { name: 'ColorHunt - Sweet Matcha', category: 'Pastel', colors: ['#E4F0E8', '#A8D5BA', '#6EA076', '#3E6B48', '#1C3829'] },
+  { name: 'Cherry Blossom', category: 'Pastel', colors: ['#2B1055', '#59287B', '#8C52FF', '#FF66C4', '#FFDEE9'] },
+  { name: 'Soft Sorbet', category: 'Pastel', colors: ['#FFF5E4', '#FFE3E1', '#FFD1D1', '#FF9494', '#FFF5E4'] },
+  { name: 'Sweet Matcha', category: 'Pastel', colors: ['#E4F0E8', '#A8D5BA', '#6EA076', '#3E6B48', '#1C3829'] },
   { name: 'Bubblegum Pastel', category: 'Pastel', colors: ['#FFC2D1', '#FFE5EC', '#FB6F92', '#FFB3C6', '#FF8FAB'] },
   { name: 'Pastel Cloud', category: 'Pastel', colors: ['#D0F4DE', '#A9DEF9', '#E4C1F9', '#FCF6BD', '#FF99C8'] },
   { name: 'Vanilla Cream', category: 'Pastel', colors: ['#FDFBF7', '#F7F0E5', '#EADBC8', '#DAC0A3', '#0F2C59'] },
@@ -96,8 +88,116 @@ const TRENDING_PALETTES: TrendingPalette[] = [
   { name: 'Blush Pink', category: 'Pastel', colors: ['#FFF0F5', '#FFE4E1', '#FFC0CB', '#FFB6C1', '#FF69B4'] },
   { name: 'Pastel Pistachio', category: 'Pastel', colors: ['#E8F5E9', '#C8E6C9', '#A5D6A7', '#81C784', '#66BB6A'] },
   { name: 'Powder Blue', category: 'Pastel', colors: ['#E0F7FA', '#B2EBF2', '#80DEEA', '#4DD0E1', '#26C6DA'] },
-  { name: 'Soft Mauve', category: 'Pastel', colors: ['#F3E5F5', '#E1BEE7', '#CE93D8', '#BA68C8', '#AB47BC'] },
-  { name: 'Pastel Coral Sky', category: 'Pastel', colors: ['#FFEBEE', '#FFCDD2', '#EF9A9A', '#E57373', '#EF5350'] },
+
+  // --- VIVID (20 Palettes) ---
+  { name: 'Electric Voltage', category: 'Vivid', colors: ['#7209B7', '#560BAD', '#480CA8', '#3A0CA3', '#4CC9F0'] },
+  { name: 'Cyberpunk Neon', category: 'Vivid', colors: ['#F72585', '#7209B7', '#3F37C9', '#4361EE', '#4CC9F0'] },
+  { name: 'Tropical Punch', category: 'Vivid', colors: ['#FF5964', '#FFE74C', '#6BF178', '#35A7FF', '#9F7AEA'] },
+  { name: 'Neon Arcade', category: 'Vivid', colors: ['#FF007F', '#7928CA', '#00DFD8', '#FF4D4D', '#F5A623'] },
+  { name: 'Ultra Violet', category: 'Vivid', colors: ['#240046', '#3C096C', '#5A189A', '#7B2CBF', '#9D4EDD'] },
+  { name: 'Solar Flare', category: 'Vivid', colors: ['#FF4800', '#FF5400', '#FF6000', '#FF6D00', '#FF7900'] },
+  { name: 'Electric Cyan', category: 'Vivid', colors: ['#03045E', '#0077B6', '#00B4D8', '#00F5D4', '#7B2CBF'] },
+  { name: 'Vivid Fuchsia', category: 'Vivid', colors: ['#4A0033', '#800055', '#B30077', '#E60099', '#FF33B5'] },
+  { name: 'Lime Charge', category: 'Vivid', colors: ['#0A3200', '#1C6400', '#329600', '#4DC800', '#70FF00'] },
+  { name: 'Vivid Hyperdrive', category: 'Vivid', colors: ['#FF0055', '#FF5000', '#FFCC00', '#00FF66', '#00CCFF'] },
+  { name: 'Laser Tag', category: 'Vivid', colors: ['#2B0038', '#670087', '#B700E0', '#FF26ED', '#00F0FF'] },
+  { name: 'Acid Green Rush', category: 'Vivid', colors: ['#122B00', '#2D5E00', '#52A300', '#83F200', '#C2FF54'] },
+  { name: 'Hot Pink Burst', category: 'Vivid', colors: ['#3D001B', '#7A0037', '#B80053', '#F5006F', '#FF4D9B'] },
+  { name: 'Supernova Gold', category: 'Vivid', colors: ['#382400', '#704800', '#A86C00', '#E09000', '#FFB700'] },
+  { name: 'Vivid Tangerine', category: 'Vivid', colors: ['#401100', '#802200', '#C03300', '#FF4400', '#FF7733'] },
+  { name: 'Plasma Energy', category: 'Vivid', colors: ['#0F0038', '#26008B', '#4800E0', '#8533FF', '#C299FF'] },
+  { name: 'Electric Berry', category: 'Vivid', colors: ['#3B0024', '#780049', '#B5006E', '#F20093', '#FF4DB3'] },
+  { name: 'Ultra Lime Punch', category: 'Vivid', colors: ['#193800', '#3D7D00', '#63C200', '#8DFF14', '#BAFF66'] },
+  { name: 'Hyper Orange', category: 'Vivid', colors: ['#3D1B00', '#7A3600', '#B85100', '#F56C00', '#FF9533'] },
+  { name: 'Vivid Cobalt Rush', category: 'Vivid', colors: ['#000F38', '#00268C', '#0047E0', '#337DFF', '#80B2FF'] },
+
+  // --- DARK (20 Palettes) ---
+  { name: 'Onyx Shadow', category: 'Dark', colors: ['#0B0F19', '#111827', '#1F2937', '#374151', '#4B5563'] },
+  { name: 'Midnight Obsidian', category: 'Dark', colors: ['#030712', '#0F172A', '#1E293B', '#334155', '#475569'] },
+  { name: 'Charcoal Minimal', category: 'Dark', colors: ['#18181B', '#27272A', '#3F3F46', '#52525B', '#71717A'] },
+  { name: 'Dark Gothic', category: 'Dark', colors: ['#120006', '#26000E', '#4A001B', '#75002B', '#A8003E'] },
+  { name: 'Deep Space', category: 'Dark', colors: ['#050515', '#0C0C27', '#181845', '#2B2B6B', '#45459E'] },
+  { name: 'Abyssal Black', category: 'Dark', colors: ['#050505', '#121212', '#1E1E1E', '#2A2A2A', '#383838'] },
+  { name: 'Dark Forest Night', category: 'Dark', colors: ['#02120B', '#072618', '#0E4029', '#18613F', '#268759'] },
+  { name: 'Dark Emerald', category: 'Dark', colors: ['#01140E', '#032B1E', '#064A35', '#0C7353', '#15A376'] },
+  { name: 'Midnight Wine', category: 'Dark', colors: ['#140207', '#2A0510', '#4A0B1E', '#731431', '#A32247'] },
+  { name: 'Volcanic Ash', category: 'Dark', colors: ['#0F0E0E', '#1F1D1D', '#333030', '#4A4646', '#666161'] },
+  { name: 'Deep Indigo Dark', category: 'Dark', colors: ['#080617', '#120D2F', '#201850', '#34297C', '#4C3DB0'] },
+  { name: 'Dark Sapphire', category: 'Dark', colors: ['#030B18', '#081730', '#0F274F', '#1B3E7A', '#2A5AA8'] },
+  { name: 'Graphite Coal', category: 'Dark', colors: ['#141517', '#212326', '#32353A', '#474B52', '#60656E'] },
+  { name: 'Dark Blood Moon', category: 'Dark', colors: ['#170202', '#2E0606', '#520D0D', '#801818', '#B32727'] },
+  { name: 'Deep Olive Dark', category: 'Dark', colors: ['#0F1206', '#1F240C', '#343D15', '#4E5B22', '#6E8033'] },
+  { name: 'Dark Teal Depth', category: 'Dark', colors: ['#031417', '#08272E', '#0F404B', '#1B606F', '#29879C'] },
+  { name: 'Midnight Violet', category: 'Dark', colors: ['#0F0318', '#1F0730', '#340D4E', '#501778', '#7324A8'] },
+  { name: 'Dark Espresso', category: 'Dark', colors: ['#140D0B', '#261916', '#3D2A24', '#593F37', '#7D5A50'] },
+  { name: 'Dark Steel Gray', category: 'Dark', colors: ['#111318', '#1C2029', '#2C3240', '#40495C', '#59657E'] },
+  { name: 'Deep Cyber Dark', category: 'Dark', colors: ['#021217', '#062630', '#0C3E4F', '#165D75', '#2482A3'] },
+
+  // --- EARTH (20 Palettes) ---
+  { name: 'Savannah Soil', category: 'Earth', colors: ['#3B2F2F', '#5C4033', '#8B5A2B', '#CD853F', '#F4A460'] },
+  { name: 'Pine Moss', category: 'Earth', colors: ['#1E352B', '#2D4A3E', '#436B59', '#66947F', '#93BFAC'] },
+  { name: 'Clay Canyon', category: 'Earth', colors: ['#4A2311', '#7A3B1D', '#B3572D', '#D97E4A', '#F2AB79'] },
+  { name: 'Stone Granite', category: 'Earth', colors: ['#2B2B2B', '#424242', '#616161', '#828282', '#A3A3A3'] },
+  { name: 'Desert Dune', category: 'Earth', colors: ['#544332', '#7A644D', '#A3886B', '#CCA987', '#F2D2B1'] },
+  { name: 'Forest Bark', category: 'Earth', colors: ['#261C14', '#423225', '#634B38', '#8B6A50', '#B89272'] },
+  { name: 'Earthy Sage', category: 'Earth', colors: ['#28332B', '#3E4D42', '#596E60', '#7B9483', '#A4BFAC'] },
+  { name: 'Terracotta Soil', category: 'Earth', colors: ['#401E13', '#663221', '#994D35', '#CC6D4E', '#F29676'] },
+  { name: 'Oatmeal Natural', category: 'Earth', colors: ['#423D33', '#666052', '#8C8473', '#B3AA98', '#D9D0BE'] },
+  { name: 'River Mud', category: 'Earth', colors: ['#211B14', '#382F24', '#544738', '#786652', '#A18B72'] },
+  { name: 'Raw Sandstone', category: 'Earth', colors: ['#423321', '#6B5438', '#997B55', '#C7A375', '#F0C997'] },
+  { name: 'Wild Olive', category: 'Earth', colors: ['#272C15', '#404724', '#5D6636', '#808C4D', '#A6B56B'] },
+  { name: 'Earth Ochre', category: 'Earth', colors: ['#3D2704', '#66420B', '#946215', '#C78722', '#F2B14B'] },
+  { name: 'Mushroom Taupe', category: 'Earth', colors: ['#302B27', '#4C4540', '#6E645D', '#948880', '#BDAFA6'] },
+  { name: 'Timber Cedar', category: 'Earth', colors: ['#36190D', '#572C19', '#804429', '#B0613D', '#E0855A'] },
+  { name: 'Earthy Clay Stone', category: 'Earth', colors: ['#38241F', '#593D36', '#805C52', '#AC8176', '#D6ACA1'] },
+  { name: 'Deep Woodland', category: 'Earth', colors: ['#172115', '#2A3626', '#41523D', '#5F755A', '#849E7E'] },
+  { name: 'Burlap Hemp', category: 'Earth', colors: ['#3D372E', '#61584A', '#8A7F6C', '#B3A691', '#DCD0BA'] },
+  { name: 'Roasted Pecan', category: 'Earth', colors: ['#331E14', '#543323', '#7D4D36', '#AA6A4C', '#D68E6B'] },
+  { name: 'Wild Cedarwood', category: 'Earth', colors: ['#2B1408', '#4A2511', '#703A1E', '#9E552E', '#CC7747'] },
+
+  // --- RETRO (20 Palettes) ---
+  { name: '70s Disco', category: 'Retro', colors: ['#4D1234', '#9E2A2B', '#E09F3E', '#FFF3B0', '#335C67'] },
+  { name: '80s Synthwave', category: 'Retro', colors: ['#2B0938', '#5D0E41', '#001D6E', '#FF2281', '#75D5FD'] },
+  { name: 'Vintage Diner', category: 'Retro', colors: ['#7A1E1E', '#BE3144', '#D3D6C6', '#87A96B', '#004B49'] },
+  { name: 'Polaroid 1982', category: 'Retro', colors: ['#2E4057', '#048A81', '#F4D35E', '#EE964B', '#F95738'] },
+  { name: 'Retro Cassette', category: 'Retro', colors: ['#1A1A24', '#38384D', '#F4A261', '#E76F51', '#2A9D8F'] },
+  { name: 'Groovy Mustard', category: 'Retro', colors: ['#362208', '#634012', '#9E6A21', '#DB9A37', '#FFCD63'] },
+  { name: 'Retro Pop 90s', category: 'Retro', colors: ['#FF0055', '#7A00FF', '#00E5FF', '#FFDF00', '#00FF66'] },
+  { name: 'Vintage Coral Teal', category: 'Retro', colors: ['#1D3557', '#457B9D', '#F4A261', '#E76F51', '#2A9D8F'] },
+  { name: 'Retro Sunset Stripe', category: 'Retro', colors: ['#590D22', '#800F2F', '#A4133C', '#FF4D6D', '#FF8FA3'] },
+  { name: 'Memphis Design', category: 'Retro', colors: ['#000000', '#FF3366', '#33CCFF', '#FFFF33', '#FF9933'] },
+  { name: 'Retro Teal & Gold', category: 'Retro', colors: ['#0F2E2E', '#1F5252', '#368080', '#D4AF37', '#F3E5AB'] },
+  { name: 'Vaporwave Sunset', category: 'Retro', colors: ['#2D0036', '#590066', '#9900B3', '#FF00E6', '#00FFFF'] },
+  { name: 'Nostalgic Paper', category: 'Retro', colors: ['#362B28', '#5E4D48', '#8C756E', '#BF9A95', '#F5E6E4'] },
+  { name: 'Retro Olive Rust', category: 'Retro', colors: ['#2B2A12', '#4F4E24', '#7D7A3A', '#C45B28', '#E68A5C'] },
+  { name: 'Vintage Record', category: 'Retro', colors: ['#141419', '#2E2E38', '#575766', '#A33333', '#E6A15C'] },
+  { name: 'Groovy Orange 1974', category: 'Retro', colors: ['#471904', '#7F3009', '#BF4B11', '#F26D21', '#FF9F59'] },
+  { name: 'Retro Arcade Blue', category: 'Retro', colors: ['#040B2E', '#0D1E66', '#1736A0', '#2657E0', '#5E8BFF'] },
+  { name: 'Vintage Sepia', category: 'Retro', colors: ['#36271A', '#5E4733', '#8C6C50', '#BF9773', '#F2CB9B'] },
+  { name: 'Retro Neon Wave', category: 'Retro', colors: ['#1F003D', '#4F0080', '#9900FF', '#FF00A0', '#00FFC8'] },
+  { name: 'Classy 80s Gold', category: 'Retro', colors: ['#382E0B', '#635317', '#998127', '#D4B63D', '#FFF08A'] },
+
+  // --- NEON (20 Palettes) ---
+  { name: 'Neon Cyberpunk', category: 'Neon', colors: ['#050014', '#240046', '#7B2CBF', '#F72585', '#4CC9F0'] },
+  { name: 'Electric Lime Neon', category: 'Neon', colors: ['#0A1A00', '#1C4000', '#378000', '#5CE600', '#99FF33'] },
+  { name: 'Neon Cyan Glow', category: 'Neon', colors: ['#00101A', '#002B47', '#005994', '#009DFF', '#33C2FF'] },
+  { name: 'Neon Pink Fusion', category: 'Neon', colors: ['#1A000D', '#400021', '#800043', '#E60078', '#FF33A3'] },
+  { name: 'Laser Beam Neon', category: 'Neon', colors: ['#0D001A', '#29004D', '#5B00B3', '#A100FF', '#D480FF'] },
+  { name: 'Neon Toxic Green', category: 'Neon', colors: ['#031A00', '#084000', '#118000', '#22E600', '#55FF33'] },
+  { name: 'Ultra Neon Orange', category: 'Neon', colors: ['#1A0800', '#401400', '#802800', '#E64800', '#FF6E33'] },
+  { name: 'Neon Electric Blue', category: 'Neon', colors: ['#00051A', '#000E40', '#001D80', '#0035E6', '#3366FF'] },
+  { name: 'Neon Plasma Red', category: 'Neon', colors: ['#1A0003', '#400008', '#800010', '#E6001D', '#FF334D'] },
+  { name: 'Neon Yellow Voltage', category: 'Neon', colors: ['#1A1700', '#403900', '#807200', '#E6CD00', '#FFEA33'] },
+  { name: 'Neon Cyber City', category: 'Neon', colors: ['#090014', '#2B0047', '#7300B3', '#E600FF', '#00F0FF'] },
+  { name: 'Neon Acid Trip', category: 'Neon', colors: ['#001A03', '#004008', '#008011', '#00E61F', '#33FF52'] },
+  { name: 'Neon Hot Magenta', category: 'Neon', colors: ['#170014', '#380031', '#700062', '#C700AE', '#FF33E5'] },
+  { name: 'Neon Electric Aqua', category: 'Neon', colors: ['#00171A', '#003840', '#007080', '#00C7E6', '#33F3FF'] },
+  { name: 'Neon Purple Blaze', category: 'Neon', colors: ['#10001A', '#280040', '#500080', '#9000E6', '#C433FF'] },
+  { name: 'Neon Gold Rush', category: 'Neon', colors: ['#1A1200', '#402D00', '#805B00', '#E6A400', '#FFCA33'] },
+  { name: 'Neon Mint Spark', category: 'Neon', colors: ['#001A12', '#00402D', '#00805B', '#00E6A4', '#33FFCA'] },
+  { name: 'Neon Sunset Flare', category: 'Neon', colors: ['#1A0014', '#400033', '#800066', '#E600B8', '#FF33D6'] },
+  { name: 'Neon Violet Voltage', category: 'Neon', colors: ['#0D001F', '#21004D', '#430099', '#7700FF', '#AA55FF'] },
+  { name: 'Neon Cyber Emerald', category: 'Neon', colors: ['#001A0E', '#004022', '#008044', '#00E67B', '#33FFA8'] },
 ];
 
 export default function PaletteGeneratorTab() {
@@ -133,26 +233,33 @@ export default function PaletteGeneratorTab() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isModalOpen]);
 
-  const generateRandomHex = () => {
-    return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0').toUpperCase();
-  };
-
-  const generatePalette = useCallback(() => {
+  // Mode-Specific Math Palette Generator
+  const generatePaletteForMode = useCallback((targetMode: ColorMode) => {
     setColors(prev => {
-      const base = prev.find(c => c.locked)?.hex || generateRandomHex();
-      const newColors = prev.map(c => {
+      const baseLocked = prev.find(c => c.locked)?.hex;
+      const [baseH] = baseLocked ? hexToHsl(baseLocked) : [Math.floor(Math.random() * 360)];
+      
+      const newColors = prev.map((c, idx) => {
         if (c.locked) return c;
-        return { hex: generateRandomHex(), locked: false };
+        return { hex: generateModeHex(targetMode, idx, baseH), locked: false };
       });
+
       const firstUnlockedIndex = newColors.findIndex(c => !c.locked);
       if (firstUnlockedIndex !== -1) {
         setBaseHex(newColors[firstUnlockedIndex].hex);
-      } else {
-        setBaseHex(base);
       }
       return newColors;
     });
   }, [setBaseHex]);
+
+  const generatePalette = useCallback(() => {
+    generatePaletteForMode(mode);
+  }, [generatePaletteForMode, mode]);
+
+  const handleModeChange = (newMode: ColorMode) => {
+    setMode(newMode);
+    generatePaletteForMode(newMode);
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -237,10 +344,10 @@ export default function PaletteGeneratorTab() {
           {modes.map(m => (
             <button
               key={m.id}
-              onClick={() => setMode(m.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex-shrink-0 whitespace-nowrap ${
+              onClick={() => handleModeChange(m.id)}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all flex-shrink-0 whitespace-nowrap ${
                 mode === m.id
-                  ? isDarkMode ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-900 text-white shadow-sm'
+                  ? isDarkMode ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-900 text-white shadow-md'
                   : isDarkMode ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
@@ -402,7 +509,7 @@ export default function PaletteGeneratorTab() {
         </button>
       </div>
 
-      {/* 160+ RECOMMENDED PALETTES MODAL */}
+      {/* 165+ RECOMMENDED PALETTES MODAL */}
       {isModalOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-md animate-fadeIn"

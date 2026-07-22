@@ -1,0 +1,485 @@
+/* ─── CSS Variables ─── */
+:root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --border: rgba(255,255,255,0.07);
+    --text: #f1f1f5;
+    --muted: rgba(255,255,255,0.35);
+    --primary: #8b5cf6;
+    --primary-glow: rgba(139,92,246,0.45);
+    --radius: 20px;
+}
+
+body.light-mode {
+    --bg: #f0f0f5;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.08);
+    --text: #111118;
+    --muted: rgba(0,0,0,0.35);
+    --primary-glow: rgba(139,92,246,0.25);
+}
+
+/* ─── SVG Icons ─── */
+.btn-icon {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+    display: block;
+}
+
+*, *::before, *::after {
+    margin: 0; padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden; /* allow vertical scroll, block horizontal */
+    transition: background 0.4s, color 0.4s;
+    background-image: 
+        radial-gradient(circle at 15% 50%, rgba(139,92,246,0.12), transparent 30%),
+        radial-gradient(circle at 85% 30%, rgba(56,189,248,0.12), transparent 30%);
+}
+
+/* ─── Top Nav ─── */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    position: relative;
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logo-icon {
+    font-size: 1.4rem;
+    color: var(--primary);
+    animation: spin 8s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.logo-text {
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #c4b5fd, #38bdf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.mini-guide {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.82rem;
+    color: var(--muted);
+    background: var(--surface);
+    padding: 0.45rem 1.1rem;
+    border-radius: 50px;
+    border: 1px solid var(--border);
+}
+
+kbd {
+    background: var(--primary);
+    color: #fff;
+    padding: 0.05rem 0.45rem;
+    border-radius: 5px;
+    font-size: 0.75rem;
+    font-family: inherit;
+    font-weight: 700;
+}
+
+.dot { opacity: 0.4; }
+
+.icon-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 50px;
+    transition: color 0.2s, transform 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.icon-btn:hover {
+    color: var(--text);
+    transform: scale(1.06);
+}
+
+.bmac-btn {
+    background: #FFDD00;
+    color: #000;
+    padding: 0.5rem 1.1rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    box-shadow: 0 0 0 rgba(255,221,0,0);
+}
+
+.bmac-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 18px rgba(255, 221, 0, 0.5);
+}
+
+/* ─── Hero Header ─── */
+.hero {
+    text-align: center;
+    padding: 0.5rem 2rem 1.5rem;
+    flex-shrink: 0;
+}
+
+.hero h1 {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -1px;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #a78bfa 0%, #38bdf8 60%, #34d399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    margin-top: 0.6rem;
+    color: var(--muted);
+    font-size: 1rem;
+}
+
+/* ─── Mode Selector ─── */
+.mode-selector {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1.25rem;
+}
+
+.mode-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 0.45rem 1.1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.2px;
+}
+
+.mode-btn:hover {
+    color: var(--text);
+    border-color: rgba(255,255,255,0.2);
+    transform: translateY(-1px);
+}
+
+.mode-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    box-shadow: 0 4px 14px var(--primary-glow);
+}
+
+/* ─── Palette Area ─── */
+.palette-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 380px; /* never collapse below this */
+    position: relative;
+}
+
+.palette-container {
+    flex: 1;
+    display: flex;
+    gap: 6px;
+    padding: 0 1.5rem;
+    min-height: 320px; /* floor height — columns never squish below this */
+}
+
+/* ─── Color Column ─── */
+.color-col {
+    flex: 1;
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: flex 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.color-col:hover {
+    flex: 1.35;
+}
+
+.color-fill {
+    position: absolute;
+    inset: 0;
+    background: #333;
+    transition: background-color 0.55s ease;
+}
+
+/* Locked overlay shimmer */
+.color-col[data-locked="true"] .color-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        45deg,
+        rgba(255,255,255,0) 0px,
+        rgba(255,255,255,0) 8px,
+        rgba(255,255,255,0.04) 8px,
+        rgba(255,255,255,0.04) 10px
+    );
+}
+
+/* Hover overlay (dark scrim for readability) */
+.color-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.25rem 1rem;
+    background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0) 30%,
+        rgba(0,0,0,0.55) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.color-col:hover .color-overlay {
+    opacity: 1;
+}
+
+.color-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.action-btn {
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    border-radius: 50px;
+    width: 2.4rem;
+    height: 2.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.action-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
+}
+
+/* Lock icon stays visible when locked */
+.color-col[data-locked="true"] .lock-btn {
+    background: rgba(139,92,246,0.7);
+    border-color: rgba(139,92,246,0.9);
+    color: #fff;
+}
+
+/* Lock badge always-on when locked */
+.color-col[data-locked="true"]::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    width: 22px;
+    height: 22px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 50%;
+    z-index: 5;
+    pointer-events: none;
+    backdrop-filter: blur(4px);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.3);
+}
+
+.color-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.hex-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #fff;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+    font-variant-numeric: tabular-nums;
+    /* LOCKED SIZE — no more jiggling */
+    display: inline-block;
+    min-width: 76px;
+}
+
+/* Invisible color picker */
+.color-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+    pointer-events: none;
+}
+
+.picker-label { cursor: pointer; }
+
+/* ─── Generate Button ─── */
+.generate-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 1.5rem;
+    flex-shrink: 0;
+}
+
+.primary-btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 0.9rem 2.5rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    border-radius: 50px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    box-shadow: 0 6px 24px var(--primary-glow);
+    transition: transform 0.25s, box-shadow 0.25s, background 0.25s;
+    letter-spacing: 0.3px;
+}
+
+.primary-btn:hover {
+    background: #7c3aed;
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 10px 32px var(--primary-glow);
+}
+
+.primary-btn:active {
+    transform: scale(0.98);
+}
+
+/* ─── Toast ─── */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--text);
+    color: var(--bg);
+    padding: 0.75rem 1.75rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 999;
+}
+
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+/* ─── Responsive ─── */
+
+/* Medium screens — slightly tighter */
+@media (max-width: 1024px) {
+    .palette-container {
+        padding: 0 1rem;
+    }
+    .mini-guide { display: none; }
+}
+
+/* Small screens — stack vertically */
+@media (max-width: 700px) {
+    body { overflow-y: auto; } /* enable scroll on mobile */
+
+    .palette-wrapper {
+        min-height: unset;
+    }
+
+    .palette-container {
+        flex-direction: column;
+        padding: 0 1rem;
+        gap: 8px;
+        min-height: unset;
+    }
+
+    .color-col {
+        flex: none;
+        height: 90px;  /* fixed height per bar on mobile */
+        border-radius: 14px;
+        transition: height 0.3s ease;
+    }
+
+    .color-col:hover {
+        flex: none;
+        height: 130px;
+    }
+
+    .color-overlay {
+        opacity: 1;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(to right, rgba(0,0,0,0) 30%, rgba(0,0,0,0.6) 100%);
+    }
+
+    .color-actions {
+        flex-direction: row;
+        gap: 0.4rem;
+    }
+
+    .hero h1 { font-size: 1.6rem; }
+    .hero { padding: 0.5rem 1rem 1rem; }
+    .topbar { padding: 0.75rem 1rem; }
+    .generate-wrapper { padding: 1rem; }
+}

@@ -1,65 +1,179 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useRef } from 'react';
+import Header from '@/components/Header';
+import ColorPicker from '@/components/ColorPicker';
+import PaletteBar from '@/components/PaletteBar';
+import PaletteGeneratorTab from '@/components/PaletteGeneratorTab';
+import HeroCard from '@/components/previews/HeroCard';
+import CategoriesCard from '@/components/previews/CategoriesCard';
+import FinanceCard from '@/components/previews/FinanceCard';
+import RadioCard from '@/components/previews/RadioCard';
+import ScheduleCard from '@/components/previews/ScheduleCard';
+import ProfileCard from '@/components/previews/ProfileCard';
+import RevenueChart from '@/components/previews/RevenueChart';
+import PricingCard from '@/components/previews/PricingCard';
+import TicketsCard from '@/components/previews/TicketsCard';
+import CoursesCard from '@/components/previews/CoursesCard';
+import AnalyticsCard from '@/components/previews/AnalyticsCard';
+import SettingsCard from '@/components/previews/SettingsCard';
+import CalendarCard from '@/components/previews/CalendarCard';
+import ButtonMatrix from '@/components/previews/ButtonMatrix';
+import IllustrationCard from '@/components/previews/IllustrationCard';
+import HandbookCard from '@/components/previews/HandbookCard';
+import DonutStatsCard from '@/components/previews/DonutStatsCard';
+import { downloadElementAsPng, getExportFileName } from '@/lib/exportUtils';
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState<'palette' | 'tailwind'>('palette');
+  const [isExportingPage, setIsExportingPage] = useState(false);
+  const studioPageRef = useRef<HTMLDivElement>(null);
+
+  const handleExportFullPage = async () => {
+    if (!studioPageRef.current) return;
+    setIsExportingPage(true);
+    const filename = getExportFileName('twgen');
+    await downloadElementAsPng(studioPageRef.current, filename);
+    setIsExportingPage(false);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <>
+      <Header activeTab={activeTab} setActiveTab={setActiveTab} />
+      <main className="max-w-[1400px] mx-auto px-5 py-8">
+
+        {/* Tab 1: Random Palette Generator (AuraGen Original) */}
+        {activeTab === 'palette' && (
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-1">
+              <h1 className="text-2xl font-black text-slate-800 tracking-tight">
+                AuraGen Color Palette Generator
+              </h1>
+              <p className="text-slate-500 text-sm">
+                Generate random color harmonies, lock your favorite shades, and export ready-to-use color schemes.
+              </p>
+            </div>
+            <PaletteGeneratorTab />
+          </div>
+        )}
+
+        {/* Tab 2: Tailwind Studio (50-950 scale & component visualizer) */}
+        {activeTab === 'tailwind' && (
+          <div className="flex flex-col gap-6">
+            {/* Controls Row (Not included in exported PNG) */}
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-black text-slate-800 tracking-tight">Tailwind Studio</h1>
+                <p className="text-slate-500 text-sm mt-0.5">Pick a base color → get a full 50–950 scale with real UI previews.</p>
+              </div>
+              <ColorPicker onExportPage={handleExportFullPage} isExportingPage={isExportingPage} />
+            </div>
+
+            {/* Export Target Container (Starts from PaletteBar down) */}
+            <div ref={studioPageRef} className="flex flex-col gap-6 p-3 rounded-3xl bg-[#f0f2f5]">
+              {/* Palette Strip */}
+              <PaletteBar />
+
+              {/* Examples Section Header */}
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Component Visualizer</p>
+              </div>
+
+              {/* Structured Groups with Outer Frames */}
+              <div className="flex flex-col gap-6">
+
+                {/* Group 1: System Overview & Domains */}
+                <section className="bg-white/60 border border-slate-200/80 p-5 rounded-3xl shadow-sm backdrop-blur-sm">
+                  <h2 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 px-1">
+                    System Overview &amp; Domains
+                  </h2>
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
+                    <HeroCard />
+                    <CategoriesCard />
+                    <FinanceCard />
+                  </div>
+                </section>
+
+                {/* Group 2: Developer Profile & Schedule */}
+                <section className="bg-white/60 border border-slate-200/80 p-5 rounded-3xl shadow-sm backdrop-blur-sm">
+                  <h2 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 px-1">
+                    Developer Profile &amp; Schedule
+                  </h2>
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
+                    <RadioCard />
+                    <ScheduleCard />
+                    <ProfileCard />
+                  </div>
+                </section>
+
+                {/* Group 3: Financial Metrics & Subscriptions */}
+                <section className="bg-white/60 border border-slate-200/80 p-5 rounded-3xl shadow-sm backdrop-blur-sm">
+                  <h2 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 px-1">
+                    Financial Metrics &amp; Subscriptions
+                  </h2>
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+                    <div className="lg:col-span-5">
+                      <RevenueChart />
+                    </div>
+                    <div className="lg:col-span-7">
+                      <PricingCard />
+                    </div>
+                  </div>
+                </section>
+
+                {/* Group 4: Support Desk & Learning Portal */}
+                <section className="bg-white/60 border border-slate-200/80 p-5 rounded-3xl shadow-sm backdrop-blur-sm">
+                  <h2 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 px-1">
+                    Support Desk &amp; Learning Portal
+                  </h2>
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+                    <div className="lg:col-span-5">
+                      <TicketsCard />
+                    </div>
+                    <div className="lg:col-span-7">
+                      <CoursesCard />
+                    </div>
+                  </div>
+                </section>
+
+                {/* Group 5: Active Workspace Performance */}
+                <section className="bg-white/60 border border-slate-200/80 p-5 rounded-3xl shadow-sm backdrop-blur-sm">
+                  <h2 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 px-1">
+                    Active Workspace Performance
+                  </h2>
+                  <AnalyticsCard />
+                </section>
+
+                {/* Group 6: System Security & UI Kit */}
+                <section className="bg-white/60 border border-slate-200/80 p-5 rounded-3xl shadow-sm backdrop-blur-sm">
+                  <h2 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 px-1">
+                    System Security &amp; UI Kit
+                  </h2>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-stretch">
+                    <SettingsCard />
+                    <ButtonMatrix />
+                  </div>
+                </section>
+
+                {/* Group 7: Developer Resources & Metrics */}
+                <section className="bg-white/60 border border-slate-200/80 p-5 rounded-3xl shadow-sm backdrop-blur-sm">
+                  <h2 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-3 px-1">
+                    Developer Resources &amp; Metrics
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 items-stretch">
+                    <IllustrationCard />
+                    <CalendarCard />
+                    <HandbookCard />
+                    <DonutStatsCard />
+                  </div>
+                </section>
+
+              </div>
+            </div>
+          </div>
+        )}
+
       </main>
-    </div>
+    </>
   );
 }

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraGen — Color Palette Generator</title>
+    <meta name="description" content="Generate beautiful, harmonious color palettes instantly. Lock colors, pick custom shades, and copy hex codes in one click.">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="dark-mode">
+
+    <!-- SVG Sprite (hidden, reusable icons) -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+        <symbol id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </symbol>
+        <symbol id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </symbol>
+        <symbol id="icon-lock-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+        </symbol>
+        <symbol id="icon-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </symbol>
+        <symbol id="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </symbol>
+        <symbol id="icon-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="13.5" cy="6.5" r="1.5"/>
+            <circle cx="17.5" cy="10.5" r="1.5"/>
+            <circle cx="8.5" cy="7.5" r="1.5"/>
+            <circle cx="6.5" cy="12.5" r="1.5"/>
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8z"/>
+        </symbol>
+        <symbol id="icon-wand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m15 4-1 1"/>
+            <path d="m4 15-1 1"/>
+            <path d="m12 8 1-1"/>
+            <path d="m8 12-1 1"/>
+            <path d="M2 2l20 20"/>
+            <path d="m17 4 3-3"/>
+            <path d="m3 18 3-3"/>
+            <path d="m7 7 3 3"/>
+        </symbol>
+    </svg>
+
+    <!-- Top Bar -->
+    <nav class="topbar">
+        <div class="logo">
+            <span class="logo-icon">✦</span>
+            <span class="logo-text">AuraGen</span>
+        </div>
+        <div class="topbar-actions">
+            <div class="mini-guide">
+                <span><kbd>Space</kbd> Generate</span>
+                <span class="dot">·</span>
+                <span>Pick · Lock · Copy</span>
+            </div>
+            <button id="theme-toggle" class="icon-btn" title="Toggle theme">
+                <svg class="btn-icon"><use href="#icon-moon"/></svg>
+            </button>
+            <a href="https://buymeacoffee.com/prayebin" target="_blank" class="bmac-btn">
+                ☕ Support
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="hero">
+        <h1>Beautiful Palettes,<br><span class="gradient-text">Instantly.</span></h1>
+        <p class="subtitle">Press <kbd>Space</kbd> or click Generate to create a color palette.</p>
+
+        <!-- Mode Selector -->
+        <div class="mode-selector">
+            <button class="mode-btn active" data-mode="harmony">✦ Harmony</button>
+            <button class="mode-btn" data-mode="warm">🔥 Warm</button>
+            <button class="mode-btn" data-mode="vivid">⚡ Vivid</button>
+            <button class="mode-btn" data-mode="pastel">🌸 Pastel</button>
+            <button class="mode-btn" data-mode="cool">❄️ Cool</button>
+        </div>
+    </header>
+
+    <!-- Palette -->
+    <main class="palette-wrapper">
+        <div class="palette-container" id="palette">
+
+            <div class="color-col" data-locked="false">
+                <div class="color-fill"></div>
+                <div class="color-overlay">
+                    <div class="color-actions">
+                        <label class="action-btn picker-label" title="Pick color">
+                            <svg class="btn-icon"><use href="#icon-palette"/></svg>
+                            <input type="color" class="color-input">
+                        </label>
+                        <button class="action-btn lock-btn" title="Lock color">
+                            <svg class="btn-icon lock-icon"><use href="#icon-lock-open"/></svg>
+                        </button>
+                        <button class="action-btn copy-btn" title="Copy hex">
+                            <svg class="btn-icon"><use href="#icon-copy"/></svg>
+                        </button>
+                    </div>
+                    <div class="color-info">
+                        <span class="hex-value">#A78BFA</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="color-col" data-locked="false">
+                <div class="color-fill"></div>
+                <div class="color-overlay">
+                    <div class="color-actions">
+                        <label class="action-btn picker-label" title="Pick color">
+                            <svg class="btn-icon"><use href="#icon-palette"/></svg>
+                            <input type="color" class="color-input">
+                        </label>
+                        <button class="action-btn lock-btn" title="Lock color">
+                            <svg class="btn-icon lock-icon"><use href="#icon-lock-open"/></svg>
+                        </button>
+                        <button class="action-btn copy-btn" title="Copy hex">
+                            <svg class="btn-icon"><use href="#icon-copy"/></svg>
+                        </button>
+                    </div>
+                    <div class="color-info">
+                        <span class="hex-value">#A78BFA</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="color-col" data-locked="false">
+                <div class="color-fill"></div>
+                <div class="color-overlay">
+                    <div class="color-actions">
+                        <label class="action-btn picker-label" title="Pick color">
+                            <svg class="btn-icon"><use href="#icon-palette"/></svg>
+                            <input type="color" class="color-input">
+                        </label>
+                        <button class="action-btn lock-btn" title="Lock color">
+                            <svg class="btn-icon lock-icon"><use href="#icon-lock-open"/></svg>
+                        </button>
+                        <button class="action-btn copy-btn" title="Copy hex">
+                            <svg class="btn-icon"><use href="#icon-copy"/></svg>
+                        </button>
+                    </div>
+                    <div class="color-info">
+                        <span class="hex-value">#A78BFA</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="color-col" data-locked="false">
+                <div class="color-fill"></div>
+                <div class="color-overlay">
+                    <div class="color-actions">
+                        <label class="action-btn picker-label" title="Pick color">
+                            <svg class="btn-icon"><use href="#icon-palette"/></svg>
+                            <input type="color" class="color-input">
+                        </label>
+                        <button class="action-btn lock-btn" title="Lock color">
+                            <svg class="btn-icon lock-icon"><use href="#icon-lock-open"/></svg>
+                        </button>
+                        <button class="action-btn copy-btn" title="Copy hex">
+                            <svg class="btn-icon"><use href="#icon-copy"/></svg>
+                        </button>
+                    </div>
+                    <div class="color-info">
+                        <span class="hex-value">#A78BFA</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="color-col" data-locked="false">
+                <div class="color-fill"></div>
+                <div class="color-overlay">
+                    <div class="color-actions">
+                        <label class="action-btn picker-label" title="Pick color">
+                            <svg class="btn-icon"><use href="#icon-palette"/></svg>
+                            <input type="color" class="color-input">
+                        </label>
+                        <button class="action-btn lock-btn" title="Lock color">
+                            <svg class="btn-icon lock-icon"><use href="#icon-lock-open"/></svg>
+                        </button>
+                        <button class="action-btn copy-btn" title="Copy hex">
+                            <svg class="btn-icon"><use href="#icon-copy"/></svg>
+                        </button>
+                    </div>
+                    <div class="color-info">
+                        <span class="hex-value">#A78BFA</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="generate-wrapper">
+            <button id="generate-btn" class="primary-btn">
+                <svg class="btn-icon" style="width:18px;height:18px"><use href="#icon-wand"/></svg>
+                Generate
+            </button>
+        </div>
+    </main>
+
+    <div id="toast" class="toast">Copied!</div>
+
+    <script src="script.js"></script>
+</body>
+</html>

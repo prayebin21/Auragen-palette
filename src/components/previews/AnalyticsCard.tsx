@@ -21,13 +21,15 @@ export default function AnalyticsCard() {
 
   return (
     <PreviewCard htmlContent={html} cssContent={html} label="Copy">
-      <div className="bg-white rounded-2xl border border-slate-200 grid grid-cols-3 divide-x divide-slate-100 shadow-sm">
+      <div className="bg-white rounded-2xl border border-slate-200 flex flex-col sm:grid sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 shadow-sm">
         {stats.map((s, i) => (
-          <div key={i} className="p-5">
-            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-2">{s.label}</div>
-            <div className="text-2xl font-black text-slate-900 leading-none">{s.value}</div>
-            <div className="text-[11px] text-slate-400 mt-1 mb-2">{s.from}</div>
-            <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full"
+          <div key={i} className="p-3.5 sm:p-5 flex items-center justify-between sm:flex-col sm:items-start sm:justify-between">
+            <div>
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-0.5">{s.label}</div>
+              <div className="text-lg sm:text-2xl font-black text-slate-900 leading-none">{s.value}</div>
+              <div className="text-[11px] text-slate-400 mt-1 hidden sm:block">{s.from}</div>
+            </div>
+            <span className="inline-flex items-center text-[10px] font-bold px-2.5 py-1 sm:py-0.5 rounded-full"
               style={{ backgroundColor: scale[50], color: scale[700] }}>
               {s.change}
             </span>

@@ -51,17 +51,17 @@ export default function Home() {
     <div className={`min-h-screen transition-colors duration-300 relative ${
       isDarkMode ? 'bg-[#0b0f19] text-white' : 'bg-[#FAF6EE] text-slate-900'
     }`}>
-      {/* 100% VISIBLE FULL PAGE BACKGROUND IMAGE (bg.png & bgdark.png) */}
+      {/* FULL PAGE BACKGROUND IMAGE (bg.png & bgdark.png) */}
       <img
         src={isDarkMode ? '/bgdark.png' : '/bg.png'}
         alt="Background"
-        className="fixed inset-0 w-full h-full object-cover object-top pointer-events-none transition-opacity duration-500 opacity-30 z-0"
+        className="fixed inset-0 w-full h-full object-cover object-top pointer-events-none transition-opacity duration-500 opacity-70 z-0"
       />
 
       {/* FOREGROUND CONTENT LAYER */}
       <div className="relative z-10">
         <Header activeTab={activeTab} setActiveTab={setActiveTab} />
-        <main className="max-w-[1400px] mx-auto px-5 py-6">
+        <main className="max-w-[1400px] mx-auto px-4 sm:px-5 py-6">
 
           {/* Tab 0: Futuristic Warm Organic Landing Index Page */}
           {activeTab === 'home' && (
@@ -75,8 +75,8 @@ export default function Home() {
           {activeTab === 'palette' && (
             <div className="flex flex-col">
               {/* Title Row */}
-              <div className="h-14 flex items-center justify-between gap-4 mb-5">
-                <h1 className={`text-3xl font-black tracking-tight leading-none ${titleClass}`}>
+              <div className="min-h-14 flex items-center justify-between gap-4 mb-5">
+                <h1 className={`text-2xl sm:text-3xl font-black tracking-tight leading-none ${titleClass}`}>
                   Palette <span className="text-orange-600">Generator</span>
                 </h1>
               </div>
@@ -87,9 +87,9 @@ export default function Home() {
           {/* Tab 2: Tailwind Studio (50-950 scale & component visualizer) */}
           {activeTab === 'tailwind' && (
             <div className="flex flex-col">
-              {/* Title Row */}
-              <div className="h-14 flex items-center justify-between gap-4 mb-5">
-                <h1 className={`text-3xl font-black tracking-tight leading-none ${titleClass}`}>
+              {/* Title Row - Responsive Flex Column on Mobile */}
+              <div className="min-h-14 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+                <h1 className={`text-2xl sm:text-3xl font-black tracking-tight leading-none ${titleClass}`}>
                   Tailwind <span className="text-orange-600">Studio</span>
                 </h1>
                 <ColorPicker onExportPage={handleExportFullPage} isExportingPage={isExportingPage} />

@@ -14,16 +14,25 @@ export default function SettingsCard() {
 
   return (
     <PreviewCard htmlContent={html} cssContent={html} label="Copy">
-      <div className="grid grid-cols-3 gap-3">
+      <div className="flex flex-col sm:grid sm:grid-cols-3 gap-2.5">
         {items.map(({ Icon, title, desc, shade }) => (
-          <div key={title} className="text-white p-4 rounded-2xl flex flex-col justify-between" style={{ backgroundColor: scale[shade] }}>
-            <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0 mb-3">
-              <Icon size={18} />
+          <div
+            key={title}
+            className="text-white px-4 py-3.5 sm:p-4 rounded-2xl flex items-center justify-between sm:flex-col sm:justify-between shadow-xs transition-transform hover:scale-[1.01] min-h-[58px] sm:min-h-[110px]"
+            style={{ backgroundColor: scale[shade] }}
+          >
+            <div className="flex items-center gap-3 sm:flex-col sm:items-start sm:gap-0">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0 sm:mb-3">
+                <Icon size={16} className="sm:w-[18px] sm:h-[18px]" />
+              </div>
+              <div>
+                <div className="text-xs sm:text-xs font-bold leading-snug">{title}</div>
+                <div className="text-[10px] opacity-80 leading-relaxed hidden sm:block mt-0.5">{desc}</div>
+              </div>
             </div>
-            <div>
-              <div className="text-xs font-bold mb-1 leading-snug">{title}</div>
-              <div className="text-[10px] opacity-80 leading-relaxed">{desc}</div>
-            </div>
+            <span className="text-[10px] font-mono font-bold bg-white/20 px-2 py-0.5 rounded-md sm:hidden flex-shrink-0 ml-2">
+              {shade}
+            </span>
           </div>
         ))}
       </div>
